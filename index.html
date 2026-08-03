@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MagOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div id="bootScreen" aria-label="Starting MagOS">
+        <div class="boot-content">
+            <div class="boot-mark"><span>OS</span></div>
+            <div class="boot-title">MAG OS</div>
+            <div class="boot-subtitle">Starting workspace</div>
+            <div class="boot-track"><div class="boot-progress"></div></div>
+            <div class="boot-status" id="bootStatus">Loading desktop services</div>
+        </div>
+    </div>
+
+    <canvas id="effectsCanvas"></canvas>
+    <div id="liveWallpaperContainer"><div class="overlay"></div></div>
+    <div id="desktopShortcuts" aria-label="Desktop shortcuts"></div>
+
+    <div id="lockScreen">
+        <h1 id="timeDisplay">00:00</h1>
+        <div class="lock-weather">
+            <img id="lockWeatherIcon" src="" />
+            <div>
+                <div class="temp" id="lockTemp">--°</div>
+                <div class="condition" id="lockCondition">Loading...</div>
+                <div class="location" id="lockLocation">Detecting...</div>
+            </div>
+        </div>
+        <p style="margin-top:20px">Make today count</p>
+        <small>Click anywhere to unlock</small>
+    </div>
+
+    <div class="top-dock" id="topDock">
+        <div class="td-item" data-app-id="calendarWindow">
+            <span class="td-icon"></span>
+            <span class="td-date" id="topDate">Jan 1</span>
+        </div>
+        <div class="td-divider"></div>
+        <div class="td-item">
+            <span class="td-icon"></span>
+            <span class="td-time" id="topTime">00:00</span>
+        </div>
+        <div class="td-divider"></div>
+        <div class="td-item td-battery" id="batteryDisplay">
+            <span class="battery-icon" id="batteryIcon"></span>
+            <span class="battery-level" id="batteryLevel">--%</span>
+        </div>
+        <div class="td-divider"></div>
+        <div class="td-item td-wifi" id="wifiDisplay"></div>
+        <div class="td-divider"></div>
+        <div class="td-item" data-action="toggle-fullscreen">
+            <span class="td-icon">⛶</span>
+        </div>
+    </div>
+
+    <div id="notificationPanel">
+        <div class="notif-item"><span class="notif-icon"></span><span class="notif-text">Welcome to MagOS!</span><span class="notif-time">Just now</span></div>
+        <div class="notif-item"><span class="notif-icon"></span><span class="notif-text">Weather updated</span><span class="notif-time">2 min ago</span></div>
+        <div class="notif-item"><span class="notif-icon"></span><span class="notif-text">System ready</span><span class="notif-time">5 min ago</span></div>
+        <div class="notif-empty" id="notifEmpty" style="display:none;">No notifications</div>
+    </div>
+
+    <div class="taskbar-container">
+        <div class="start-btn" data-action="toggle-start-menu">
+            <svg viewBox="0 0 24 24">
+                <rect x="3" y="3" width="8.5" height="8.5" rx="1.5" fill="#fff" />
+                <rect x="12.5" y="3" width="8.5" height="8.5" rx="1.5" fill="#fff" />
+                <rect x="3" y="12.5" width="8.5" height="8.5" rx="1.5" fill="#fff" />
+                <rect x="12.5" y="12.5" width="8.5" height="8.5" rx="1.5" fill="#fff" fill-opacity="0.3" />
+            </svg>
+        </div>
+
+        <div class="dock glass" id="dock">
+            <div class="icon" data-app-id="timer"><img src="https://img.icons8.com/fluency/48/timer.png" title="Timer" /></div>
+            <div class="icon" data-app-id="tasks"><img src="https://img.icons8.com/fluency/48/task.png" title="Tasks" /></div>
+            <div class="icon" data-app-id="calc"><img src="https://img.icons8.com/fluency/48/calculator.png" title="Calculator" /></div>
+            <div class="icon" data-app-id="notes"><img src="https://img.icons8.com/fluency/48/note.png" title="Notes" /></div>
+            <div class="icon" data-app-id="stats"><img src="https://img.icons8.com/fluency/48/combo-chart.png" title="Stats" /></div>
+            <div class="icon" data-app-id="settings"><img src="https://img.icons8.com/fluency/48/settings.png" title="Settings" /></div>
+            <div class="icon" data-action="open-theme-store"><img src="https://img.icons8.com/fluency/48/control-panel.png" title="Themes" /></div>
+            <div class="icon" data-app-id="paintWindow"><img src="https://img.icons8.com/fluency/48/paint-brush.png" title="Paint" /></div>
+            <div class="icon" data-app-id="calendarWindow"><img src="https://img.icons8.com/fluency/48/calendar.png" title="Calendar" /></div>
+            <div class="icon" data-app-id="terminalWindow"><img src="https://img.icons8.com/fluency/48/console.png" title="Terminal" /></div>
+            <div class="icon" data-app-id="screenRecorder"><img src="https://play-lh.googleusercontent.com/S8kF4Ob6xEoGezGZ84jNaMqBhXl8w36ia1il3wzGo-Z51ONjgWzXzoPnvam1HIupM71Z9zcsK-Zue4xg5H6S=w240-h480-rw" title="Screen Recorder" /></div>
+            <div class="icon add-apps-icon" data-app-id="customAppsManager">
+                <span class="add-apps-symbol">✚</span>
+            </div>
+
+            <div id="pinnedAppsContainer" style="display:flex;gap:10px;"></div>
+
+            <div class="weather-widget" data-app-id="weatherDetails">
+                <img id="taskbarWeatherIcon" src="" />
+                <div>
+                    <div class="weather-temp" id="taskbarTemp">--°</div>
+                    <div class="weather-condition" id="taskbarCondition">Loading...</div>
+                </div>
+            </div>
+
+            <div class="dock-actions">
+                <span class="deep-focus-toggle" data-action="toggle-deep-focus">Focus</span>
+                <span class="fullscreen-toggle" data-action="toggle-fullscreen">⛶</span>
+            </div>
+        </div>
+
+        <div id="startMenu" class="start-menu" onclick="event.stopPropagation()">
+            <h3>Workspaces</h3>
+            <div class="menu-item" data-app-id="novaWindow"><span class="dot"></span>Nova</div>
+            <div class="menu-item" data-app-id="lumiWindow"><span class="dot"></span>Lumi</div>
+            <div class="menu-item" data-external-url="https://chatgpt.com"><span class="dot"></span>ChatGPT</div>
+            <div class="menu-item" data-external-url="https://www.canva.com/"><span class="dot"></span>Canva</div>
+            <div class="menu-item" data-external-url="https://open.spotify.com"><span class="dot"></span>Spotify</div>
+            <div class="menu-item" data-external-url="https://www.notion.so"><span class="dot"></span>Notion</div>
+            <div class="menu-item" data-external-url="https://notebooklm.google"><span class="dot"></span>NotebookLM</div>
+            <div class="menu-item" data-external-url="https://github.com"><span class="dot"></span>GitHub</div>
+            <div class="menu-item" data-external-url="https://hackatime.hackclub.com/"><span class="dot"></span>HackaTime</div>
+            <div class="menu-item" data-external-url="https://www.linkedin.com/"><span class="dot"></span>LinkedIn</div>
+            <h3>Media & Games</h3>
+            <div class="menu-item" data-app-id="songboxWindow"><span class="dot"></span>Songbox</div>
+            <div class="menu-item" data-external-url="https://www.youtube.com"><span class="dot"></span>YouTube</div>
+            <div class="menu-item" data-external-url="https://www.chess.com/play/computer"><span class="dot"></span>Chess</div>
+            <div class="menu-item" data-external-url="https://slowroads.io/"><span class="dot"></span>Slow Roads</div>
+            <div class="menu-item" data-external-url="https://itch.io"><span class="dot"></span>Itch.io</div>
+            <h3>Social</h3>
+            <div class="menu-item" data-external-url="https://discord.com/"><span class="dot"></span>Discord</div>
+            <div class="menu-item" data-external-url="https://www.instagram.com/?hl=en"><span class="dot"></span>Instagram</div>
+            <div class="menu-item" data-external-url="https://www.snapchat.com/"><span class="dot"></span>Snapchat</div>
+            <div class="menu-item" data-external-url="https://www.facebook.com/"><span class="dot"></span>Facebook</div>
+            <div class="menu-item" data-external-url="https://web.telegram.org/"><span class="dot"></span>Telegram</div>
+            <div class="menu-item" data-external-url="https://x.com/"><span class="dot"></span>X</div>
+            <div class="menu-item" data-external-url="https://slack.com"><span class="dot"></span>Slack</div>
+            <div class="menu-item" data-external-url="https://www.threads.com"><span class="dot"></span>Threads</div>
+            <h3>Custom Apps</h3>
+            <div id="customAppsMenuContainer"></div>
+            <div class="menu-item" data-app-id="customAppsManager" style="color:#3b82f6;border-top:1px solid rgba(255,255,255,0.1);margin-top:4px;padding-top:8px;">
+                <span class="dot" style="background:#3b82f6;"></span>Manage Custom Apps
+            </div>
+        </div>
+    </div>
+
+    <div id="timer" class="window"><div class="titlebar"><span>Pomodoro</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('timer','left')">⊣</button><button class="snap-btn" onclick="snapWindow('timer','right')">⊢</button><button class="window-btn" onclick="minimizeApp('timer')">−</button><button class="window-btn" onclick="maximizeApp('timer')">◻</button><button class="window-btn close" onclick="closeApp('timer')">✕</button></div></div><div class="flex-center"><h2 id="mode" style="font-weight:300">Work</h2><h2 id="time" style="font-family:'Orbitron',sans-serif;font-size:32px;margin:10px 0">25:00</h2><div style="display:flex;gap:8px"><button onclick="startTimer()">Start</button><button onclick="pauseTimer()">Pause</button><button onclick="resetTimer()">Reset</button></div></div></div>
+
+    <div id="tasks" class="window"><div class="titlebar"><span>Tasks</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('tasks','left')">⊣</button><button class="snap-btn" onclick="snapWindow('tasks','right')">⊢</button><button class="window-btn" onclick="minimizeApp('tasks')">−</button><button class="window-btn" onclick="maximizeApp('tasks')">◻</button><button class="window-btn close" onclick="closeApp('tasks')">✕</button></div></div><div style="display:flex;gap:6px;flex-shrink:0"><input id="taskInput" placeholder="New objective..." /><button onclick="addTask()">Add</button></div><ul id="taskList"></ul></div>
+
+    <div id="notes" class="window"><div class="titlebar"><span>Notes</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('notes','left')">⊣</button><button class="snap-btn" onclick="snapWindow('notes','right')">⊢</button><button class="window-btn" onclick="minimizeApp('notes')">−</button><button class="window-btn" onclick="maximizeApp('notes')">◻</button><button class="window-btn close" onclick="closeApp('notes')">✕</button></div></div><textarea id="note" placeholder="Write thoughts here... Auto Save on your local storage to keep them secure."></textarea></div>
+
+    <div id="calc" class="window"><div class="titlebar"><span>Calculator</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('calc','left')">⊣</button><button class="snap-btn" onclick="snapWindow('calc','right')">⊢</button><button class="window-btn" onclick="minimizeApp('calc')">−</button><button class="window-btn" onclick="maximizeApp('calc')">◻</button><button class="window-btn close" onclick="closeApp('calc')">✕</button></div></div><input id="display" readonly /><div class="calc-grid"><button onclick="press('Math.sin(')">sin</button><button onclick="press('Math.cos(')">cos</button><button onclick="press('Math.sqrt(')">√</button><button onclick="press('/')">÷</button><button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button><button onclick="press('*')">×</button><button onclick="press('4')">4</button><button onclick="press('5')">5</button><button onclick="press('6')">6</button><button onclick="press('-')">−</button><button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button><button onclick="press('+')">+</button><button onclick="press('0')">0</button><button onclick="press('.')">.</button><button onclick="calculate()">=</button><button onclick="clearCalc()">C</button></div><div id="historyPanel"></div></div>
+
+    <div id="stats" class="window"><div class="titlebar"><span>Analytics</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('stats','left')">⊣</button><button class="snap-btn" onclick="snapWindow('stats','right')">⊢</button><button class="window-btn" onclick="minimizeApp('stats')">−</button><button class="window-btn" onclick="maximizeApp('stats')">◻</button><button class="window-btn close" onclick="closeApp('stats')">✕</button></div></div><div class="flex-center"><p id="studySessions" style="font-size:18px;font-weight:500">Sessions: 0</p></div></div>
+
+    <div id="settings" class="window">
+        <div class="titlebar"><span>Settings</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('settings','left')">⊣</button><button class="snap-btn" onclick="snapWindow('settings','right')">⊢</button><button class="window-btn" onclick="minimizeApp('settings')">−</button><button class="window-btn" onclick="maximizeApp('settings')">◻</button><button class="window-btn close" onclick="closeApp('settings')">✕</button></div></div>
+        <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:70vh">
+            <label style="font-size:12px;opacity:0.6">Static Wallpapers</label>
+            <div class="wallpaper-grid">
+                <div class="wallpaper-preview" onclick="setWallpaper('https://images6.alphacoders.com/139/thumb-1920-1392974.jpg')"><img src="https://images6.alphacoders.com/139/thumb-1920-1392974.jpg" /><div class="label">Anime</div></div>
+                <div class="wallpaper-preview" onclick="setWallpaper('https://www.pixelstalk.net/wp-content/uploads/images6/Anime-Boy-Wallpaper-Desktop.jpg')"><img src="https://www.pixelstalk.net/wp-content/uploads/images6/Anime-Boy-Wallpaper-Desktop.jpg" /><div class="label">Gojo</div></div>
+                <div class="wallpaper-preview" onclick="setWallpaper('https://4kwallpapers.com/images/wallpapers/lofi-japanese-3840x2160-14884.jpg')"><img src="https://4kwallpapers.com/images/wallpapers/lofi-japanese-3840x2160-14884.jpg" /><div class="label">Lofi</div></div>
+                <div class="wallpaper-preview" onclick="setWallpaper('black')" style="background:#111"><div class="label" style="color:#fff">Black</div></div>
+                <div class="wallpaper-preview" onclick="setWallpaper('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920')"><img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920" /><div class="label">Stars</div></div>
+                <div class="wallpaper-preview" onclick="setWallpaper('https://4kwallpapers.com/images/wallpapers/gargantua-black-3840x2160-9621.jpg')"><img src="https://4kwallpapers.com/images/wallpapers/gargantua-black-3840x2160-9621.jpg" /><div class="label">Black Hole</div></div>
+                <div class="wallpaper-preview" onclick="setWallpaper('https://images7.alphacoders.com/548/thumb-1920-548890.jpg')"><img src="https://images7.alphacoders.com/548/thumb-1920-548890.jpg" /><div class="label">Demon</div></div>
+                <div class="wallpaper-preview" onclick="setWallpaper('https://www.pixelstalk.net/wp-content/uploads/2025/07/Anime-Hello-Kitty-backgrounds-designed-for-fans-of-the-beloved-character.jpg')"><img src="https://www.pixelstalk.net/wp-content/uploads/2025/07/Anime-Hello-Kitty-backgrounds-designed-for-fans-of-the-beloved-character.jpg" /><div class="label">Hello Kitty</div></div>
+                <div class="wallpaper-preview" onclick="setWallpaper('https://images.alphacoders.com/903/thumb-1920-903819.png')"><img src="https://images.alphacoders.com/903/thumb-1920-903819.png" /><div class="label">Your Name</div></div>
+                 <div class="wallpaper-preview" onclick="setWallpaper('https://4kwallpapers.com/images/wallpapers/cinnamoroll-5k-cute-5120x2880-11712.png')"><img src="https://4kwallpapers.com/images/wallpapers/cinnamoroll-5k-cute-5120x2880-11712.png" /><div class="label">Cinnamon Roll</div></div>
+                 <div class="wallpaper-preview" onclick="setWallpaper('https://4kwallpapers.com/images/wallpapers/muscle-car-retro-vintage-car-sunset-neon-5k-2560x1440-1229.jpg')"><img src="https://4kwallpapers.com/images/wallpapers/muscle-car-retro-vintage-car-sunset-neon-5k-2560x1440-1229.jpg" /><div class="label">Car</div></div>
+                 <div class="wallpaper-preview" onclick="setWallpaper('https://4kwallpapers.com/images/wallpapers/gear-5-monkey-d-5120x2880-17522.jpg')"><img src="https://4kwallpapers.com/images/wallpapers/gear-5-monkey-d-5120x2880-17522.jpg" /><div class="label">Luffy</div></div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px">
+                <input id="customWall" placeholder="Custom image URL..." />
+                <button onclick="setWallpaper(customWall.value)">Apply</button>
+            </div>
+
+            <label style="font-size:12px;opacity:0.6;margin-top:8px">Live Wallpapers</label>
+            <div class="live-wallpaper-grid">
+                <div class="live-wallpaper-preview" data-wallpaper-source="Sakura.mp4" onclick="setLiveWallpaper('Sakura.mp4', 'Sakura')"><video src="Sakura.mp4" muted loop playsinline preload="metadata"></video><div class="label">Sakura</div></div>
+                <div class="live-wallpaper-preview" data-wallpaper-source="Ninjas.mp4" onclick="setLiveWallpaper('Ninjas.mp4', 'Ninja')"><video src="Ninjas.mp4" muted loop playsinline preload="metadata"></video><div class="label">Ninja</div></div>
+                <div class="live-wallpaper-preview" data-wallpaper-source="aurora.mp4" onclick="setLiveWallpaper('aurora.mp4', 'Aurora')"><video src="aurora.mp4" muted loop playsinline preload="metadata"></video><div class="label">Aurora</div></div>
+                <div class="live-wallpaper-preview" data-wallpaper-source="Anime.mp4" onclick="setLiveWallpaper('Anime.mp4', 'Anime')"><video src="Anime.mp4" muted loop playsinline preload="metadata"></video><div class="label">Anime</div></div>
+                <div class="live-wallpaper-preview" data-wallpaper-source="blackhole.mp4" onclick="setLiveWallpaper('blackhole.mp4', 'Black Hole')"><video src="blackhole.mp4" muted loop playsinline preload="metadata"></video><div class="label">Black Hole</div></div>
+                <div class="live-wallpaper-preview" data-wallpaper-source="drift.mp4" onclick="setLiveWallpaper('drift.mp4', 'Drift')"><video src="drift.mp4" muted loop playsinline preload="metadata"></video><div class="label">Drift</div></div>
+                <div class="live-wallpaper-preview" data-wallpaper-source="skely.mp4" onclick="setLiveWallpaper('skely.mp4', 'Skely Astronaut')"><video src="skely.mp4" muted loop playsinline preload="metadata"></video><div class="label">Skely Astronaut</div></div>
+                <div class="live-wallpaper-preview" data-wallpaper-source="miles.mp4" onclick="setLiveWallpaper('miles.mp4', 'Miles Morales')"><video src="miles.mp4" muted loop playsinline preload="metadata"></video><div class="label">Miles Morales</div></div>
+                <div class="live-wallpaper-preview" data-wallpaper-source="uhhhidkwhattocallthis.mp4" onclick="setLiveWallpaper('uhhhidkwhattocallthis.mp4', 'Autumn')"><video src="uhhhidkwhattocallthis.mp4" muted loop playsinline preload="metadata"></video><div class="label">Autumn</div></div>
+            </div>
+                <div class="live-wallpaper-url-input" style="display:flex;gap:6px;margin-top:8px;">
+                    <input id="liveWallpaperUrl" placeholder="Video filename (e.g., myvideo.mp4)" />
+                    <button onclick="setCustomLiveWallpaper()">Apply</button>
+                </div>
+                <button onclick="stopLiveWallpaper()" style="margin-top:8px;background:rgba(231,76,60,0.3)">⏹️ Stop Live</button>
+                <div id="wallpaperStatus" class="wallpaper-status"></div>
+            </div>
+
+            <label style="font-size:12px;opacity:0.6;margin-top:8px">Overlay Effects</label>
+            <div class="effect-selector">
+                <button class="effect-btn active" onclick="setEffect('none')" id="effNone">None</button>
+                <button class="effect-btn" onclick="setEffect('stars')" id="effStars">Stars</button>
+                <button class="effect-btn" onclick="setEffect('rain')" id="effRain">Rain</button>
+                <button class="effect-btn" onclick="setEffect('snow')" id="effSnow">Snow</button>
+            </div>
+
+            <div class="manual-location" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);">
+                <label>Location</label>
+                <div style="display:flex;gap:6px"><input id="manualLocationInput" placeholder="City, Country" /><button onclick="setManualLocation()">Set</button></div>
+                <div style="display:flex;gap:6px;margin-top:4px"><button onclick="forceLocationUpdate()" style="flex:1;background:rgba(46,204,113,0.3)">🔄 Update</button><button onclick="resetLocation()" style="flex:1;background:rgba(231,76,60,0.2)">Reset</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="weatherDetails" class="window"><div class="titlebar"><span>Weather</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('weatherDetails','left')">⊣</button><button class="snap-btn" onclick="snapWindow('weatherDetails','right')">⊢</button><button class="window-btn" onclick="minimizeApp('weatherDetails')">−</button><button class="window-btn" onclick="maximizeApp('weatherDetails')">◻</button><button class="window-btn close" onclick="closeApp('weatherDetails')">✕</button></div></div><div class="flex-center" style="padding:10px"><div style="display:flex;align-items:center;gap:20px;margin-bottom:15px"><img id="detailWeatherIcon" src="" style="width:64px;border-radius:50%;object-fit:cover;" /><div><div style="font-size:36px;font-weight:300" id="detailTemp">--°</div><div id="detailCondition">Loading...</div><div style="opacity:0.6" id="detailLocation">Detecting...</div></div></div><div class="weather-details"><div class="weather-detail-item"><div class="label">Feels Like</div><div class="value" id="detailFeelsLike">--°</div></div><div class="weather-detail-item"><div class="label">Humidity</div><div class="value" id="detailHumidity">--%</div></div><div class="weather-detail-item"><div class="label">Wind</div><div class="value" id="detailWind">-- km/h</div></div><div class="weather-detail-item"><div class="label">Pressure</div><div class="value" id="detailPressure">-- hPa</div></div></div><button onclick="refreshWeather()" style="margin-top:15px;width:100%">🔄 Refresh</button></div></div>
+
+    <div id="songboxWindow" class="window"><div class="titlebar"><span>Songbox</span><div class="window-controls"><button class="window-btn" onclick="minimizeApp('songboxWindow')">−</button><button class="window-btn" onclick="maximizeApp('songboxWindow')">◻</button><button class="window-btn close" onclick="closeApp('songboxWindow')">✕</button></div></div><iframe src="https://stirring-queijadas-c6d330.netlify.app/" allow="autoplay;clipboard-write;encrypted-media"></iframe></div>
+
+    <div id="novaWindow" class="window website-window"><div class="titlebar"><span>Nova</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('novaWindow','left')">⊣</button><button class="snap-btn" onclick="snapWindow('novaWindow','right')">⊢</button><button class="window-btn" onclick="minimizeApp('novaWindow')">−</button><button class="window-btn" onclick="maximizeApp('novaWindow')">◻</button><button class="window-btn close" onclick="closeApp('novaWindow')">✕</button></div></div><iframe src="https://glowing-eclair-7f5dac.netlify.app/" title="Nova" allow="fullscreen;clipboard-write"></iframe></div>
+    <div id="lumiWindow" class="window website-window"><div class="titlebar"><span>Lumi</span><div class="window-controls"><button class="window-btn" onclick="openExternal('https://lumi.speedhawks.online/')" title="Open Lumi in browser">Open in browser</button><button class="snap-btn" onclick="snapWindow('lumiWindow','left')">⊣</button><button class="snap-btn" onclick="snapWindow('lumiWindow','right')">⊢</button><button class="window-btn" onclick="minimizeApp('lumiWindow')">−</button><button class="window-btn" onclick="maximizeApp('lumiWindow')">◻</button><button class="window-btn close" onclick="closeApp('lumiWindow')">✕</button></div></div><iframe src="https://lumi.speedhawks.online/" title="Lumi" allow="fullscreen;clipboard-write"></iframe></div>
+
+    <div id="calendarWindow" class="window">
+        <div class="titlebar"><span>Calendar</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('calendarWindow','left')">⊣</button><button class="snap-btn" onclick="snapWindow('calendarWindow','right')">⊢</button><button class="window-btn" onclick="minimizeApp('calendarWindow')">−</button><button class="window-btn" onclick="maximizeApp('calendarWindow')">◻</button><button class="window-btn close" onclick="closeApp('calendarWindow')">✕</button></div></div>
+        <div class="calendar-header">
+            <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+            <span class="month-year" id="calMonthYear">January 2024</span>
+            <button class="nav-btn" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div id="terminalWindow" class="window">
+        <div class="terminal-header titlebar">
+            <span class="term-title"><span class="dot"></span> Terminal</span>
+            <div class="term-controls">
+                <button onclick="clearTerminal()">Clear</button>
+                <button class="window-btn close" onclick="closeApp('terminalWindow')">✕</button>
+            </div>
+        </div>
+        <div class="terminal-body" id="terminalBody">
+            <div class="term-output"><span class="prompt">➜</span> <span class="info">MagOS Terminal v2.0</span></div>
+            <div class="term-output"><span class="prompt">➜</span> <span class="info">Type <span style="color:#fff;">help</span> for commands</span></div>
+            <div class="term-input-line">
+                <span class="prompt-symbol">➜</span>
+                <input type="text" id="termInput" placeholder="Type a command..." autofocus />
+            </div>
+        </div>
+    </div>
+
+    <div id="customAppsManager" class="window">
+        <div class="titlebar"><span>Custom Apps</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('customAppsManager','left')">⊣</button><button class="snap-btn" onclick="snapWindow('customAppsManager','right')">⊢</button><button class="window-btn" onclick="minimizeApp('customAppsManager')">−</button><button class="window-btn" onclick="maximizeApp('customAppsManager')">◻</button><button class="window-btn close" onclick="closeApp('customAppsManager')">✕</button></div></div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="add-app-form">
+                <div class="form-row"><input id="newAppName" placeholder="App name" /><input id="newAppUrl" placeholder="Website URL" /></div>
+                <div class="form-row"><input id="newAppIcon" placeholder="Icon URL (optional)" /><button onclick="addCustomApp()">➕ Add App</button></div>
+                <div id="iconPreviewContainer" class="icon-preview-container" style="display:none;"><img id="iconPreview" class="icon-preview" src="" /><div><div class="icon-preview-label">Icon Preview</div><div class="icon-preview-url" id="iconPreviewUrl"></div></div></div>
+                <small style="opacity:0.4;font-size:11px;">Apps open in new tabs. Icons appear as circle cutouts.</small>
+            </div>
+            <div><label style="font-size:12px;opacity:0.6;">Your Custom Apps</label><div id="customAppsList" class="custom-apps-list"></div></div>
+            <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;"><button onclick="clearAllCustomApps()" style="background:rgba(231,76,60,0.2);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;">🗑️ Clear All</button><button onclick="exportCustomApps()" style="background:rgba(46,204,113,0.2);border:1px solid rgba(46,204,113,0.3);color:#2ecc71;">📤 Export</button><button onclick="document.getElementById('importAppsInput').click()" style="background:rgba(52,152,219,0.2);border:1px solid rgba(52,152,219,0.3);color:#3498db;">📥 Import</button><input id="importAppsInput" type="file" accept=".json" style="display:none" onchange="importCustomApps(event)" /></div>
+        </div>
+    </div>
+
+    <div id="paintWindow" class="window">
+        <div class="titlebar"><span>Paint</span><div class="window-controls"><button class="snap-btn" onclick="snapWindow('paintWindow','left')">⊣</button><button class="snap-btn" onclick="snapWindow('paintWindow','right')">⊢</button><button class="window-btn" onclick="minimizeApp('paintWindow')">−</button><button class="window-btn" onclick="maximizeApp('paintWindow')">◻</button><button class="window-btn close" onclick="closeApp('paintWindow')">✕</button></div></div>
+        <div class="paint-toolbar">
+            <label>Color <input id="paintColor" type="color" value="#111827" /></label>
+            <label>Size <input id="paintSize" type="range" min="1" max="48" value="8" /><span id="paintSizeValue">8 px</span></label>
+            <button id="paintBrush" class="active" onclick="setPaintTool('brush')">Brush</button>
+            <button id="paintEraser" onclick="setPaintTool('eraser')">Eraser</button>
+            <button onclick="clearPaintCanvas()">Clear</button>
+            <button onclick="downloadPaint()">Save PNG</button>
+        </div>
+        <canvas id="paintCanvas" aria-label="Paint canvas"></canvas>
+    </div>
+
+    <div id="screenRecorder" class="window" style="width:500px;min-height:350px;">
+        <div class="titlebar">
+            <span>Screen Recorder</span>
+            <div class="window-controls">
+                <button class="snap-btn" onclick="snapWindow('screenRecorder','left')">⊣</button>
+                <button class="snap-btn" onclick="snapWindow('screenRecorder','right')">⊢</button>
+                <button class="window-btn" onclick="minimizeApp('screenRecorder')">−</button>
+                <button class="window-btn" onclick="maximizeApp('screenRecorder')">◻</button>
+                <button class="window-btn close" onclick="closeApp('screenRecorder')">✕</button>
+            </div>
+        </div>
+        <div class="recorder-shell">
+            <div class="recorder-controls">
+                <button id="startRecordBtn" class="recorder-btn recorder-btn-primary" onclick="startScreenRecording()">
+                    Start Recording
+                </button>
+                <button id="stopRecordBtn" class="recorder-btn recorder-btn-secondary" onclick="stopScreenRecording()" style="display:none;">
+                    Stop Recording
+                </button>
+                <button class="recorder-btn" onclick="clearRecordings()">
+                    Clear All
+                </button>
+            </div>
+            <div id="recordingStatus" class="recorder-status">
+                ⏸️ Ready to record
+            </div>
+            <div id="recordingsList" class="recorder-list">
+                <div class="recorder-list-empty">No recordings yet</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
